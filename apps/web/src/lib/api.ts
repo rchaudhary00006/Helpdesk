@@ -1,6 +1,12 @@
 import type {
   AttachmentDto,
   AuditLogDto,
+  BusinessScheduleDto,
+  BusinessScheduleInput,
+  HolidayDto,
+  HolidayInput,
+  SlaPolicyDto,
+  UpdateSlaPolicyInput,
   CommentDto,
   CreateCommentInput,
   CreateTicketInput,
@@ -84,6 +90,19 @@ export const api = {
   markAllNotificationsRead: () => request<void>('/notifications/read-all', { method: 'POST' }),
 
   inboundEmails: () => request<InboundEmailDto[]>('/inbound/emails'),
+
+  slaPolicies: () => request<SlaPolicyDto[]>('/sla/policies'),
+  updateSlaPolicy: (priority: string, input: UpdateSlaPolicyInput) =>
+    request<SlaPolicyDto>(`/sla/policies/${priority}`, { method: 'PUT', json: input }),
+  schedules: () => request<BusinessScheduleDto[]>('/sla/schedules'),
+  createSchedule: (input: BusinessScheduleInput) =>
+    request<BusinessScheduleDto>('/sla/schedules', { method: 'POST', json: input }),
+  updateSchedule: (id: string, input: BusinessScheduleInput) =>
+    request<BusinessScheduleDto>(`/sla/schedules/${id}`, { method: 'PUT', json: input }),
+  addHoliday: (scheduleId: string, input: HolidayInput) =>
+    request<HolidayDto>(`/sla/schedules/${scheduleId}/holidays`, { method: 'POST', json: input }),
+  removeHoliday: (scheduleId: string, holidayId: string) =>
+    request<void>(`/sla/schedules/${scheduleId}/holidays/${holidayId}`, { method: 'DELETE' }),
 
   upload: (file: File) => {
     const form = new FormData();

@@ -71,6 +71,11 @@ export const requireStaff: RequestHandler = (req: Request, _res: Response, next:
   next();
 };
 
+export const requireAdmin: RequestHandler = (req: Request, _res: Response, next: NextFunction) => {
+  if (req.user?.role !== 'ADMIN') throw forbidden('Admins only');
+  next();
+};
+
 /** Use after requireAuth. */
 export function currentUser(req: Request): AuthUser {
   if (!req.user) throw unauthorized();

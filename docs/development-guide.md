@@ -99,6 +99,9 @@ New rules or parsing logic **must** come with unit tests. Keep them pure so they
 | Express 5 `req.query` is read-only | Parse it into a local (`schema.parse(req.query)`). Don't reassign it. |
 | Node 18 has no `--env-file` | We load `.env` with `dotenv-cli` in npm scripts. |
 | Workspace packages ship TS source | Next uses `transpilePackages`, and API/worker builds bundle them with `tsup` (`noExternal`). |
+| `Date.parse("2026-02-30")` succeeds (→ March 2) | Validate dates with a round-trip check (see `holidaySchema`). |
+| Time zone math | Never hand-roll offsets. Use the `Intl` helpers in `packages/shared/src/sla.ts`, and test across a DST change. |
+| Optional env var set to empty (`FOO=`) | Wrap it in the `optional()` helper in `env.ts`, which treats `''` as unset. A bare `.min(n).optional()` would crash boot. |
 | Mutation `onSuccess` returns a promise | `mutateAsync` waits for the refetch. Clear form state *before* awaiting (see `reply-box.tsx`), or fast typists lose keystrokes. |
 
 ## Pull request checklist

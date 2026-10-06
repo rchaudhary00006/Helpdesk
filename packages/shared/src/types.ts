@@ -52,6 +52,8 @@ export interface TicketListItem {
   firstRespondedAt: string | null;
   firstResponseBreached: boolean;
   resolutionBreached: boolean;
+  /** SLA clock counts working hours only (vs 24/7). */
+  slaBusinessHours: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +92,28 @@ export interface InboundEmailDto {
   reason: string | null;
   receivedAt: string;
   ticket: { id: string; number: number } | null;
+}
+
+export interface HolidayDto {
+  id: string;
+  date: string;
+  name: string;
+}
+
+export interface BusinessScheduleDto {
+  id: string;
+  name: string;
+  timezone: string;
+  intervals: { day: number; start: string; end: string }[];
+  holidays: HolidayDto[];
+}
+
+export interface SlaPolicyDto {
+  id: string;
+  priority: Priority;
+  firstResponseMinutes: number;
+  resolutionMinutes: number;
+  scheduleId: string | null;
 }
 
 export interface Paginated<T> {

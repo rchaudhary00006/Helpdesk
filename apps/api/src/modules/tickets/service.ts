@@ -3,6 +3,7 @@ import { prisma, Prisma, type Channel, type Ticket } from '@helpdesk/db';
 import {
   ACTIVE_STATUSES,
   computeSlaTargets,
+  type BusinessInterval,
   isStaff,
   type createCommentSchema,
   type createTicketSchema,
@@ -63,9 +64,22 @@ async function linkAttachments(
   if (count !== ids.length) throw badRequest('One or more attachments are invalid or already used');
 }
 
+/** SLA due dates for a priority, in business hours when the policy has a schedule. */
 async function slaTargetsFor(priority: Ticket['priority'], from: Date) {
-  const policy = await prisma.slaPolicy.findUnique({ where: { priority } });
-  return policy ? computeSlaTargets(from, policy) : { firstResponseDueAt: null, resolutionDueAt: null };
+  const policy = await prisma.slaPolicy.findUnique({
+    where: { priority },
+    include: { schedule: { include: { holidays: { select: { date: true } } } } },
+  });
+  if (!policy) return { firstResponseDueAt: null, resolutionDueAt: null, slaBusinessHours: false };
+
+  const schedule = policy.schedule
+    ? {
+        timezone: policy.schedule.timezone,
+        intervals: policy.schedule.intervals as unknown as BusinessInterval[],
+        holidays: policy.schedule.holidays.map((h) => h.date),
+      }
+    : null;
+  return { ...computeSlaTargets(from, policy, schedule), slaBusinessHours: !!schedule };
 }
 
 // ---------------------------------------------------------------- queries

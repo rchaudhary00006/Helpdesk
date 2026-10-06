@@ -2,6 +2,8 @@
 
 All apps read the root `.env` in development (loaded by `dotenv-cli` in the npm scripts). In production, set real environment variables per process. The API and worker validate their config at boot and **exit with a clear message** if something is missing or invalid.
 
+> Empty values (`FOO=`) count as **not set**, so optional features like inbound email simply stay disabled.
+>
 > Never put `NODE_ENV` in `.env`. Next.js manages it, and production process managers set `NODE_ENV=production`.
 
 ## Environment reference
@@ -41,6 +43,12 @@ All apps read the root `.env` in development (loaded by `dotenv-cli` in the npm 
 | `API_INTERNAL_URL` | `http://localhost:4000` | Used by the IMAP poller |
 | `INBOUND_EMAIL_SECRET` | | Must match the API's value (for IMAP forwarding) |
 | `IMAP_HOST` … `IMAP_POLL_SECONDS` | | See [email-to-ticket.md](./email-to-ticket.md#option-b-imap-polling-simplest-in-house-no-public-url-needed) |
+
+### Seed only (`packages/db`)
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `SEED_TIMEZONE` | machine's time zone | Time zone of the seeded "Standard hours" schedule. Afterwards, change it in **Admin → SLA & hours** |
 
 ### Web (`apps/web`)
 

@@ -7,21 +7,43 @@ const prisma = new PrismaClient();
 const PASSWORD = 'Password123!';
 const minutes = (n: number) => new Date(Date.now() + n * 60_000);
 
+// Minutes. URGENT is calendar time; the rest are business minutes (9h working day).
 const SLA: Record<Priority, [firstResponse: number, resolution: number]> = {
   URGENT: [15, 4 * 60],
-  HIGH: [60, 8 * 60],
-  NORMAL: [4 * 60, 24 * 60],
-  LOW: [8 * 60, 72 * 60],
+  HIGH: [60, 9 * 60], // 1 business day
+  NORMAL: [4 * 60, 27 * 60], // 3 business days
+  LOW: [9 * 60, 45 * 60], // 1 / 5 business days
 };
 
 async function main() {
   const passwordHash = await bcrypt.hash(PASSWORD, 10);
 
+  // Business hours in this machine's time zone (override with SEED_TIMEZONE).
+  const timezone = process.env.SEED_TIMEZONE || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const year = new Date().getFullYear();
+  const schedule = await prisma.businessSchedule.upsert({
+    where: { name: 'Standard hours' },
+    update: {},
+    create: {
+      name: 'Standard hours',
+      timezone,
+      intervals: [1, 2, 3, 4, 5].map((day) => ({ day, start: '09:00', end: '18:00' })),
+      holidays: {
+        create: [
+          { date: `${year}-12-25`, name: 'Christmas Day' },
+          { date: `${year + 1}-01-01`, name: "New Year's Day" },
+        ],
+      },
+    },
+  });
+
   for (const [priority, [fr, res]] of Object.entries(SLA) as [Priority, [number, number]][]) {
+    // Urgent incidents run 24/7; everything else only counts working hours.
+    const scheduleId = priority === 'URGENT' ? null : schedule.id;
     await prisma.slaPolicy.upsert({
       where: { priority },
-      update: { firstResponseMinutes: fr, resolutionMinutes: res },
-      create: { priority, firstResponseMinutes: fr, resolutionMinutes: res },
+      update: {},
+      create: { priority, firstResponseMinutes: fr, resolutionMinutes: res, scheduleId },
     });
   }
 
