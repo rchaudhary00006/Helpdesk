@@ -176,7 +176,7 @@ export function SlaCard({ ticket }: { ticket: TicketDetail }) {
   const stopped = ticket.status === 'SOLVED' || ticket.status === 'CLOSED';
   const due = (d: string | null, met: string | null) => (stopped && !met ? null : d);
   return (
-    <Card title="SLA">
+    <Card title={ticket.slaBusinessHours ? 'SLA · business hours' : 'SLA · 24/7'}>
       <div className="flex items-center justify-between">
         <span className="text-sm text-slate-600">First response</span>
         <SlaText

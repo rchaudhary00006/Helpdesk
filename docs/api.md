@@ -89,6 +89,10 @@ Each upload can be attached only once, and only by its uploader. Unused uploads 
 
 Response: `{ status: "PROCESSED" | "IGNORED" | "DUPLICATE", reason, ticketNumber? }`. These are always 200, so providers don't retry handled mail. A 5xx means a transient failure, which the sender should retry.
 
+## SLA configuration
+
+`/sla/policies`, `/sla/schedules` and holidays: staff can read, admins can write. See [sla.md](./sla.md#api) for the full table.
+
 ## Health
 
 `GET /health` → `200 { ok: true, db: "fulfilled", redis: "fulfilled" }`, or `503` if a dependency is down.

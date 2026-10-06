@@ -121,6 +121,8 @@ model Ticket {
   firstRespondedAt      DateTime?
   firstResponseBreached Boolean   @default(false)
   resolutionBreached    Boolean   @default(false)
+  /// True when the targets above were computed in business hours (shown to agents)
+  slaBusinessHours      Boolean   @default(false)
 
   resolvedAt DateTime?
   closedAt   DateTime?
@@ -202,11 +204,39 @@ model InboundEmail {
 }
 
 model SlaPolicy {
-  id                   String   @id @default(cuid())
-  priority             Priority @unique
+  id                   String            @id @default(cuid())
+  priority             Priority          @unique
   firstResponseMinutes Int
   resolutionMinutes    Int
-  updatedAt            DateTime @updatedAt
+  /// Null = clock runs 24/7 (calendar time)
+  scheduleId           String?
+  schedule             BusinessSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  updatedAt            DateTime          @updatedAt
+}
+
+/// Working hours used by SLA policies. Times are wall-clock in `timezone`.
+model BusinessSchedule {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  /// IANA zone, e.g. "Asia/Kolkata"
+  timezone    String
+  /// [{ day: 0-6 (Sun=0), start: "HH:MM", end: "HH:MM" }] — multiple per day allowed (split shifts)
+  intervals   Json
+  holidays    Holiday[]
+  slaPolicies SlaPolicy[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Holiday {
+  id         String           @id @default(cuid())
+  scheduleId String
+  schedule   BusinessSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  /// Local date "YYYY-MM-DD" in the schedule's timezone
+  date       String
+  name       String
+
+  @@unique([scheduleId, date])
 }
 
 model AuditLog {

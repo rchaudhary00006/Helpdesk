@@ -1,6 +1,10 @@
 import path from 'node:path';
 import { z } from 'zod';
 
+/** `FOO=` in .env means "not set" — treat empty strings as undefined so optional vars stay optional. */
+const optional = <T extends z.ZodTypeAny>(inner: T) =>
+  z.preprocess((v) => (v === '' ? undefined : v), inner.optional());
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_PORT: z.coerce.number().int().default(4000),
@@ -12,7 +16,7 @@ const schema = z.object({
   MAX_UPLOAD_MB: z.coerce.number().positive().default(15),
 
   // ---- Inbound email (email-to-ticket). Endpoint is disabled unless a secret is set.
-  INBOUND_EMAIL_SECRET: z.string().min(24, 'INBOUND_EMAIL_SECRET must be at least 24 characters').optional(),
+  INBOUND_EMAIL_SECRET: optional(z.string().min(24, 'INBOUND_EMAIL_SECRET must be at least 24 characters')),
   /** Comma-separated sender domains allowed to open tickets. Empty = anyone. */
   INBOUND_ALLOWED_DOMAINS: z
     .string()
@@ -26,8 +30,8 @@ const schema = z.object({
   /** Loop/flood protection. */
   INBOUND_MAX_PER_SENDER_PER_HOUR: z.coerce.number().int().positive().default(20),
   /** Our own addresses — mail from these is ignored to prevent loops. */
-  MAIL_FROM: z.string().optional(),
-  SUPPORT_EMAIL: z.string().optional(),
+  MAIL_FROM: optional(z.string()),
+  SUPPORT_EMAIL: optional(z.string()),
 });
 
 const parsed = schema.safeParse(process.env);

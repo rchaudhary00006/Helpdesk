@@ -11,6 +11,7 @@ Helpdesk is our in-house incident and ticket management tool, a lightweight Zend
 | Build a feature, write tests, add a migration | [Development guide](./development-guide.md) |
 | Look up an endpoint | [API reference](./api.md) |
 | Set up or debug email-to-ticket | [Email-to-ticket](./email-to-ticket.md) |
+| Configure SLA targets, business hours, holidays | [SLA & business hours](./sla.md) |
 | Configure env vars / deploy to production | [Configuration & deployment](./configuration.md) |
 
 ## The 60-second tour
@@ -30,7 +31,7 @@ packages/shared   Zod schemas, enums, types, email + SLA helpers (used by ALL ap
 - **Ticket.** Has a human number (`#42`), status, priority, type, requester, assignee, group and tags. The first comment is the description.
 - **Comment.** Either a *public reply* (the customer sees it) or an *internal note* (staff only; the API never sends these to customers).
 - **Status lifecycle:** `NEW → OPEN → PENDING / ON_HOLD → SOLVED → CLOSED`. CLOSED is read-only and set automatically after a ticket has been SOLVED for a while.
-- **SLA.** Each priority has first-response and resolution targets. A breach flags the ticket, writes an audit entry and escalates: assignee, then their group, then admins.
+- **SLA.** Each priority has first-response and resolution targets, counted 24/7 or only during business hours (with holidays). A breach flags the ticket, writes an audit entry and escalates: assignee, then their group, then admins.
 - **Roles.** `CUSTOMER` (own tickets only), `AGENT` and `ADMIN` (everything).
 - **Channels.** Tickets and comments come from `WEB` or `EMAIL`.
 

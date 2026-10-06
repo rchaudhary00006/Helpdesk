@@ -12,6 +12,7 @@ import { attachmentsRouter } from './modules/attachments/routes';
 import { authRouter } from './modules/auth/routes';
 import { inboundRouter } from './modules/inbound/routes';
 import { notificationsRouter } from './modules/notifications/routes';
+import { slaRouter } from './modules/sla/routes';
 import { ticketsRouter } from './modules/tickets/routes';
 import { groupsRouter, usersRouter } from './modules/users/routes';
 
@@ -39,6 +40,7 @@ export function createApp() {
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/attachments', attachmentsRouter);
   app.use('/api/inbound', inboundRouter);
+  app.use('/api/sla', slaRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler); // Express 5 forwards rejected promises from async handlers here.

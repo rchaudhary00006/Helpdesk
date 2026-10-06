@@ -78,6 +78,7 @@ apps/api/src
     tickets/rules.ts     ★ pure business rules: visibility, permissions, transitions
     tickets/service.ts   ★ ticket commands/queries; transactions + audit
     inbound/service.ts   ★ email-to-ticket pipeline
+    sla/routes.ts        admin config: SLA policies, business schedules, holidays
   events/bus.ts          in-process domain events
   events/subscribers.ts  side effects: realtime, SLA scheduling, notifications
   realtime/socket.ts     Socket.IO server, room auth
@@ -109,11 +110,13 @@ erDiagram
   Ticket ||--o{ InboundEmail : "created/updated by"
   User ||--o{ Notification : receives
   SlaPolicy }o--|| Ticket : "priority → targets"
+  BusinessSchedule ||--o{ SlaPolicy : "hours for"
+  BusinessSchedule ||--o{ Holiday : has
 ```
 
 Notes:
 - `Ticket.number` is the human ID (`#42`). URLs and the API accept either the number or the cuid.
-- SLA state lives **on the ticket** (`firstResponseDueAt`, `resolutionDueAt`, `*Breached`), so list views sort and filter without joins.
+- SLA state lives **on the ticket** (`firstResponseDueAt`, `resolutionDueAt`, `*Breached`, `slaBusinessHours`), so list views sort and filter without joins. Due dates are computed once (business-hours aware, see [sla.md](./sla.md)) and stored.
 - `Comment.isPublic=false` is an internal note. `Comment.via` is `WEB` or `EMAIL`.
 - `AuditLog.changes` is JSON: `{ field: { from, to } }`. `actorId = null` means the system did it (SLA worker, automations).
 - `InboundEmail` has one row per received email. It dedupes by `messageId` and records the outcome.

@@ -59,6 +59,8 @@ All demo users have the password **`Password123!`**. The login page has one-clic
 
 **Try this:** open an incognito window as Carol and a normal one as Alice. Create a ticket as Carol, then assign it, add an internal note and reply as Alice. Carol's window updates live, never shows the note, and an email appears in Mailpit.
 
+**Try SLA settings:** log in as Admin → *SLA & hours*. Change working hours or add a holiday and watch the *"If a ticket came in now"* preview move.
+
 **Try email-to-ticket:**
 
 ```bash

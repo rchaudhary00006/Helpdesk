@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import clsx from 'clsx';
-import { LifeBuoy, Mail, Plus } from 'lucide-react';
-import { useIsStaff, useTicketCounts } from '@/hooks/queries';
+import { Clock, LifeBuoy, Mail, Plus } from 'lucide-react';
+import { useIsStaff, useMe, useTicketCounts } from '@/hooks/queries';
 import { CUSTOMER_VIEWS, STAFF_VIEWS } from '@/lib/views';
 
 export function Sidebar() {
   const staff = useIsStaff();
+  const { data: me } = useMe();
   const pathname = usePathname();
   const search = useSearchParams();
   const { data: counts } = useTicketCounts(staff);
@@ -71,6 +72,17 @@ export function Sidebar() {
             >
               <Mail className="h-4 w-4" /> Email log
             </Link>
+            {me?.role === 'ADMIN' && (
+              <Link
+                href="/admin/sla"
+                className={clsx(
+                  'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm',
+                  pathname === '/admin/sla' ? 'bg-slate-800 text-white' : 'hover:bg-slate-800/60 hover:text-white',
+                )}
+              >
+                <Clock className="h-4 w-4" /> SLA &amp; hours
+              </Link>
+            )}
           </>
         )}
       </nav>

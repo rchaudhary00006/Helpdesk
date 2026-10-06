@@ -25,6 +25,7 @@ Open http://localhost:3000 and log in with a demo account (password `Password123
 | [Development guide](docs/development-guide.md) | Conventions, recipes (add a field, endpoint, job), testing, PR checklist |
 | [API reference](docs/api.md) | REST endpoints, errors, realtime events |
 | [Email-to-ticket](docs/email-to-ticket.md) | Webhook / IMAP setup, threading, safety rules |
+| [SLA & business hours](docs/sla.md) | Targets, working hours, holidays, how due dates are computed |
 | [Configuration & deployment](docs/configuration.md) | Every env var, production checklist |
 
 ## Repository layout
@@ -45,8 +46,9 @@ docs/             Project documentation
 - [x] SLA timers with escalation, auto-close automation, audit log
 - [x] Realtime updates and in-app + email notifications
 - [x] Email-to-ticket (provider webhook + IMAP polling, threading, loop/spoof protection)
-- [ ] **Business hours & holidays** in SLA (`packages/shared/src/sla.ts`); pause SLA while Pending
-- [ ] Admin UI: users, groups, SLA policies; customer invite / password reset; SSO (OIDC)
+- [x] SLA business hours, split shifts, holidays and time zones, with an admin UI
+- [ ] Pause SLA while Pending / On-hold; per-group schedules
+- [ ] Admin UI: users & groups; customer invite / password reset; SSO (OIDC)
 - [ ] Transactional outbox for domain events; SLA timer resync if Redis is lost
 - [ ] Optimistic concurrency on ticket updates
 - [ ] Macros, trigger builder, custom views, CSAT, reporting

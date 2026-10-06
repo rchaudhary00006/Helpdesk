@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PRIORITIES, TICKET_STATUSES, TICKET_TYPES } from './enums';
+import { isValidTimeZone } from './sla';
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -71,3 +72,56 @@ export const listTicketsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
 });
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
+
+// ---- SLA & business hours (admin)
+
+const hhmm = z.string().regex(/^(([01]\d|2[0-3]):[0-5]\d|24:00)$/, 'Use HH:MM (24h)');
+const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+
+export const businessIntervalSchema = z
+  .object({ day: z.number().int().min(0).max(6), start: hhmm, end: hhmm })
+  .refine((i) => toMin(i.start) < toMin(i.end), { message: 'End must be after start', path: ['end'] });
+
+export const businessScheduleSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    timezone: z.string().refine(isValidTimeZone, 'Unknown time zone'),
+    intervals: z.array(businessIntervalSchema).min(1, 'Add at least one working period').max(50),
+  })
+  .refine(
+    (s) =>
+      s.intervals.every((a, i) =>
+        s.intervals.every(
+          (b, j) => i === j || a.day !== b.day || toMin(a.end) <= toMin(b.start) || toMin(b.end) <= toMin(a.start),
+        ),
+      ),
+    { message: 'Working periods on the same day overlap', path: ['intervals'] },
+  );
+export type BusinessScheduleInput = z.infer<typeof businessScheduleSchema>;
+
+export const holidaySchema = z.object({
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
+    // Round-trip check: Date.parse silently rolls "2026-02-30" over to March 2.
+    .refine((d) => {
+      const t = Date.parse(`${d}T00:00:00Z`);
+      return !Number.isNaN(t) && new Date(t).toISOString().startsWith(d);
+    }, 'Invalid date'),
+  name: z.string().trim().min(1).max(80),
+});
+export type HolidayInput = z.infer<typeof holidaySchema>;
+
+const MAX_SLA_MINUTES = 60 * 24 * 90;
+export const updateSlaPolicySchema = z
+  .object({
+    firstResponseMinutes: z.number().int().min(1).max(MAX_SLA_MINUTES),
+    resolutionMinutes: z.number().int().min(1).max(MAX_SLA_MINUTES),
+    /** null = 24/7 calendar time */
+    scheduleId: z.string().nullable(),
+  })
+  .refine((p) => p.firstResponseMinutes <= p.resolutionMinutes, {
+    message: 'First response target must not exceed resolution target',
+    path: ['firstResponseMinutes'],
+  });
+export type UpdateSlaPolicyInput = z.infer<typeof updateSlaPolicySchema>;
