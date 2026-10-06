@@ -1,0 +1,56 @@
+name: helpdesk
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: helpdesk
+      POSTGRES_PASSWORD: helpdesk
+      POSTGRES_DB: helpdesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U helpdesk"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # Local SMTP sink — every outgoing email lands in the UI at http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  # Optional local IMAP/SMTP server for testing the IMAP poller:
+  #   docker compose --profile imap up -d
+  # Send mail to support@helpdesk.local via SMTP :3025; the worker polls IMAP :3143.
+  greenmail:
+    image: greenmail/standalone:2.1.2
+    profiles: ["imap"]
+    environment:
+      GREENMAIL_OPTS: >-
+        -Dgreenmail.setup.test.smtp -Dgreenmail.setup.test.imap
+        -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.users=support:support@helpdesk.local
+        -Dgreenmail.users.login=email -Dgreenmail.verbose=false
+    ports:
+      - "3025:3025"
+      - "3143:3143"
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,19 @@
+From: Carol Customer <carol@acme.test>
+To: support@helpdesk.local
+Subject: VPN keeps disconnecting every 5 minutes
+Message-ID: <example-new-ticket-001@acme.test>
+Date: Tue, 06 Oct 2026 09:00:00 +0000
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hi team,
+
+Since this morning the VPN drops every ~5 minutes for everyone in the
+Pune office. Reconnecting works but it drops again shortly after.
+
+Thanks,
+Carol
+
+--
+Carol Customer
+Acme Corp | IT Operations

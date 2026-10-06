@@ -1,0 +1,29 @@
+{
+  "name": "@helpdesk/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e ../../.env -- tsx watch --clear-screen=false src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@helpdesk/db": "*",
+    "@helpdesk/shared": "*",
+    "@socket.io/redis-emitter": "^5.1.0",
+    "bullmq": "^5.34.0",
+    "imapflow": "^1.7.8",
+    "ioredis": "^5.4.2",
+    "nodemailer": "^6.9.16",
+    "pino": "^9.6.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/nodemailer": "^6.4.17",
+    "pino-pretty": "^13.0.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "helpdesk",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "db:migrate": "npm run migrate -w @helpdesk/db",
+    "db:deploy": "npm run deploy -w @helpdesk/db",
+    "db:seed": "npm run seed -w @helpdesk/db",
+    "db:studio": "npm run studio -w @helpdesk/db",
+    "setup": "npm run infra:up && npm run db:deploy && npm run db:seed",
+    "dev": "concurrently -k -n api,worker,web -c blue,magenta,green \"npm run dev -w @helpdesk/api\" \"npm run dev -w @helpdesk/worker\" \"npm run dev -w @helpdesk/web\"",
+    "build": "npm run build -w @helpdesk/api -w @helpdesk/worker -w @helpdesk/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "dotenv-cli": "^8.0.0",
+    "typescript": "^5.6.3"
+  }
+}
